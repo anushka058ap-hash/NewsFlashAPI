@@ -1,48 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MediaStack News Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsFlashAPI</title>
 </head>
 <body>
-  <h1>News Fetching using MediaStack API</h1>
+    <h1>News by Country</h1>
+    <label for="country">Enter Country Code (e.g., IN, US, GB): </label>
+    <input type="text" id="country" placeholder="Type country code">
+    <button onclick="getNews()">Get News</button>
 
-  <input type="text" id="country" placeholder="Enter country code (eg: in, us, gb)">
-  <button id="submitBtn">Get News</button>
+    <div id="news" style="margin-top:20px;"></div>
 
-  <div id="result"></div>
+    <script>
+        const apiKey = "9ea6c9972669e965d0e3c8401522fb8b";
 
-  <script>
-    document.getElementById("submitBtn").addEventListener("click", function() {
-        let country = document.getElementById("country").value;
-
-        // 👇 paste your API key inside quotes
-        let apiKey = "9ea6c9972669e965d0e3c8401522fb8b";  
-
-        fetch(`http://api.mediastack.com/v1/news?access_key=${apiKey}&countries=${country}&limit=5`)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data); // shows full data in console
-            let output = "";
-            if(data.data) {
-              data.data.forEach(article => {
-                  output += `
-                    <h3>${article.title}</h3>
-                    <p>${article.description || "No description available."}</p>
-                    <a href="${article.url}" target="_blank">Read more</a>
-                    <hr>
-                  `;
-              });
-            } else {
-              output = "<p>No news found. Check API key or country code.</p>";
+        async function getNews() {
+            const country = document.getElementById("country").value.trim();
+            if (!country) {
+                alert("Please enter a country code!");
+                return;
             }
-            document.getElementById("result").innerHTML = output;
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            document.getElementById("result").innerHTML = "<p>Something went wrong.</p>";
-        });
-    });
-  </script>
+
+            const url = `https://api.mediastack.com/v1/news?access_key=${apiKey}&countries=${country}&limit=5`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                displayNews(data);
+            } catch (error) {
+                console.error("Error fetching news:", error);
+                document.getElementById("news").innerHTML = "<p>Something went wrong.</p>";
+            }
+        }
+
+        function displayNews(data) {
+            const container = document.getElementById("news");
+            container.innerHTML = ""; // clear old results
+
+            if (!data.data || data.data.length === 0) {
+                container.innerHTML = "<p>No news found for this country code.</p>";
+                return;
+            }
+
+            data.data.forEach(item => {
+                const div = document.createElement("div");
+                div.innerHTML = `<h3>${item.title}</h3><p>${item.description || ""}</p><hr>`;
+                container.appendChild(div);
+            });
+        }
+    </script>
 </body>
 </html>
