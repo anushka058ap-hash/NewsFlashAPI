@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediaStack News Project</title>
+</head>
+<body>
+  <h1>News Fetching using MediaStack API</h1>
+
+  <input type="text" id="country" placeholder="Enter country code (eg: in, us, gb)">
+  <button id="submitBtn">Get News</button>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById("submitBtn").addEventListener("click", function() {
+        let country = document.getElementById("country").value;
+
+        // 👇 paste your API key inside quotes
+        let apiKey = "9ea6c9972669e965d0e3c8401522fb8b";  
+
+        fetch(`http://api.mediastack.com/v1/news?access_key=${apiKey}&countries=${country}&limit=5`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // shows full data in console
+            let output = "";
+            if(data.data) {
+              data.data.forEach(article => {
+                  output += `
+                    <h3>${article.title}</h3>
+                    <p>${article.description || "No description available."}</p>
+                    <a href="${article.url}" target="_blank">Read more</a>
+                    <hr>
+                  `;
+              });
+            } else {
+              output = "<p>No news found. Check API key or country code.</p>";
+            }
+            document.getElementById("result").innerHTML = output;
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("result").innerHTML = "<p>Something went wrong.</p>";
+        });
+    });
+  </script>
+</body>
+</html>
